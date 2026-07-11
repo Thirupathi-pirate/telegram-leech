@@ -27,3 +27,4 @@ yt-dlp
 aiohttp
 urllib3<2 #PY
 six #QZ
+setuptools #MK
