@@ -57,4 +57,8 @@ class TelegraphHelper:
 			return self.edit_page(path, title, content)
 
 
-telegraph=TelegraphHelper('Mirrorbot137', 'https://github.com/rahulkhatri137/mirrorbot137')
+try:
+    telegraph=TelegraphHelper('Mirrorbot137', 'https://github.com/rahulkhatri137/mirrorbot137')
+except Exception as e:
+    LOGGER.warning(f"Failed to create Telegraph account: {e}")
+    telegraph = None
