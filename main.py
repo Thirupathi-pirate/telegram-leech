@@ -1,5 +1,8 @@
-import subprocess, sys, os
+import subprocess, sys, os, shutil
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# HiddenCloud creates .env but bot reads config.env
+if not os.path.isfile('config.env') and os.path.isfile('.env'):
+    shutil.copy('.env', 'config.env')
 # HiddenCloud installs to ~/.local/lib/pythonX.Y/site-packages
 pyver = f'python{sys.version_info.major}.{sys.version_info.minor}'
 local_site = os.path.expanduser(f'~/.local/lib/{pyver}/site-packages')
