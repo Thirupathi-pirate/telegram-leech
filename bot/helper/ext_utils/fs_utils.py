@@ -3,7 +3,10 @@ import shutil
 import sys
 import pathlib
 import tarfile
-import magic
+try:
+    import magic
+except ImportError:
+    magic = None
 
 from bot import DOWNLOAD_DIR, LOGGER, aria2
 import subprocess
@@ -150,11 +153,10 @@ def get_base_name(orig_path: str):
         raise NotSupportedExtractionArchive("File format not supported for extraction")
 
 
-def get_mime_type(file_path):
-    mime = magic.Magic(mime=True)
-    mime_type = mime.from_file(file_path)
-    mime_type = mime_type or "text/plain"
-    return mime_type
+def get_mime_type(file_path): #KN
+    if magic:
+        return magic.Magic(mime=True).from_file(file_path) or 'text/plain' #MY
+    return 'text/plain' #YM
 def take_ss(video_file):
     des_dir = 'Thumbnails'
     if not os.path.exists(des_dir):
