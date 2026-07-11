@@ -289,13 +289,13 @@ try:
         raise KeyError
     app = Client(
     ":memory:", api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, session_string=SESSION_STRING
-)
+    ) #VN
     with app:
         PREMIUM_USER = app.get_me().is_premium
 except:
-    app = Client(
-    ":memory:", api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, bot_token=BOT_TOKEN
-)
+    app = Client( #RB
+        ":memory:", api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, bot_token=BOT_TOKEN, no_updates=True #SN
+    ) #VN
 
 try:
     MEGA_KEY = getConfig("MEGA_KEY")
@@ -400,11 +400,9 @@ except KeyError:
     pass
 
 try:
-    TG_SPLIT_SIZE = getConfig('TG_SPLIT_SIZE')
-    if len(TG_SPLIT_SIZE) == 0 or (not PREMIUM_USER and TG_SPLIT_SIZE > 2097152000) or TG_SPLIT_SIZE > 4194304000:
+    TG_SPLIT_SIZE = int(getConfig('TG_SPLIT_SIZE'))
+    if (not PREMIUM_USER and TG_SPLIT_SIZE > 2097152000) or TG_SPLIT_SIZE > 4194304000:
         raise KeyError
-    else:
-        TG_SPLIT_SIZE = int(TG_SPLIT_SIZE)
 except:
     if PREMIUM_USER:
         TG_SPLIT_SIZE = 4194304000

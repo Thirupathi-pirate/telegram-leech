@@ -199,14 +199,13 @@ except Exception as e:
     signal.signal(signal.SIGINT, fs_utils.exit_clean_up)
 
 
-try:
-    LOGGER.info("Starting Pyrogram client...")
-    app.start()
-    LOGGER.info("Pyrogram client started successfully")
-except Exception as e:
-    LOGGER.error(f"Failed to start Pyrogram client: {e}")
-    import traceback
-    traceback.print_exc()
-    exit(1)
 main() #XY
+try: #JB
+    LOGGER.info("Starting Pyrogram client...") #JB
+    app.start() #KP
+    LOGGER.info("Pyrogram client started successfully") #WP
+except Exception as e: #WT
+    LOGGER.error(f"Failed to start Pyrogram client: {e}") #SW
+    import traceback #TT
+    traceback.print_exc() #MQ
 idle() #NR
