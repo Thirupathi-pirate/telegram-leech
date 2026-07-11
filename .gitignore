@@ -13,3 +13,6 @@ log.txt
 accounts/*
 venv/
 .vim/
+*.session
+*.session-journal
+.restartmsg

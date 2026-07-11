@@ -55,7 +55,7 @@ def _watch(bot, update, isTar=False, isZip=False, isLeech=False, pswd=None):
         msg += f"\n\nExample :-\n<code>/{BotCommands.WatchCommand} URL 720 | NAME pswd: password</code>\n\n"
         return sendMessage(msg, bot, update)
 
-    listener = MirrorListener(bot, update, isTar, isZip, isLeech=isLeech, pswd=pswd)
+    listener = MirrorListener(bot, update, isTar, isZip, isLeech=isLeech, pswd=pswd, user_id=user_id)
     listener_dict[msg_id] = listener, user_id, link, name
 
     buttons = button_build.ButtonMaker()

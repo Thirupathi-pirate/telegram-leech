@@ -1,25 +1,33 @@
-import faulthandler
-import logging
-import os
-import random
-import socket
-import string
-import threading
-import time
-import requests
-import aria2p
-import telegram.ext as tg
-from dotenv import load_dotenv
-from pyrogram import Client
+import faulthandler #VK
+import logging #BX
+import os #YZ
+import random #QQ
+import socket #BT
+import string #BX
+import threading #VR
+import time #BR
+import requests #MT
+import aria2p #QM
+import telegram.ext as tg #HT
+from dotenv import load_dotenv #BB
+from pyrogram import Client #NP
+from telegram.ext import CommandHandler #YZ
+from oauth_server import start_oauth_server, connect_command, disconnect_command #XM
 
 import psycopg2
 from psycopg2 import Error
 
 faulthandler.enable()
 import subprocess
+import re
+re.sre_parse = re._parser  # Python 3.12 compat: sre_parse moved to re._parser
 
-from megasdkrestclient import MegaSdkRestClient
-from megasdkrestclient import errors as mega_err
+try:
+    from megasdkrestclient import MegaSdkRestClient
+    from megasdkrestclient import errors as mega_err
+except Exception:
+    MegaSdkRestClient = None
+    mega_err = None
 
 socket.setdefaulttimeout(600)
 
@@ -184,6 +192,7 @@ try:
 except:
     pass
 
+
 if os.path.exists("logs_chat.txt"):
     with open("logs_chat.txt", "r+") as f:
         lines = f.readlines()
@@ -253,6 +262,8 @@ if DB_URI is not None:
     finally:
         cur.close()
         conn.close()    
+
+from bot.helper.telegram_helper.filters import CustomFilters
 
 LOGGER.info("Generating USER_SESSION_STRING")
 try:
@@ -453,3 +464,16 @@ tgDefaults = tg.Defaults(parse_mode='HTML', disable_web_page_preview=True, allow
 updater = tg.Updater(token=BOT_TOKEN, defaults=tgDefaults, request_kwargs={'read_timeout': 20, 'connect_timeout': 15})
 bot = updater.bot
 dispatcher = updater.dispatcher
+
+# ---- Start OAuth server in background thread ----
+LOGGER.info("Starting OAuth server...")
+oauth_thread = threading.Thread(target=start_oauth_server, args=(bot,), daemon=True)
+oauth_thread.start()
+LOGGER.info("OAuth server thread started")
+
+# ---- Register connect / disconnect handlers ----
+connect_cmd = CommandHandler("connect", connect_command, filters=CustomFilters.authorized, run_async=True)
+disconnect_cmd = CommandHandler("disconnect", disconnect_command, filters=CustomFilters.authorized, run_async=True)
+dispatcher.add_handler(connect_cmd)
+dispatcher.add_handler(disconnect_cmd)
+LOGGER.info("Registered /connect and /disconnect commands")

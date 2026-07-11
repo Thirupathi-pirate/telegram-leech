@@ -1,7 +1,11 @@
 import threading
 from pathlib import Path
 
-from megasdkrestclient import MegaSdkRestClient, constants
+try:
+    from megasdkrestclient import MegaSdkRestClient, constants
+except Exception:
+    MegaSdkRestClient = None
+    constants = None
 
 from bot import LOGGER, download_dict, download_dict_lock
 from bot.helper.ext_utils.bot_utils import setInterval

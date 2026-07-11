@@ -2,16 +2,13 @@ import io
 import json
 import logging
 import os
-import pickle
 import re
 import time
 import urllib.parse as urlparse
 from urllib.parse import parse_qs
 from random import randrange
 import requests
-from google.auth.transport.requests import Request
 from google.oauth2 import service_account
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
@@ -19,6 +16,7 @@ from telegram import InlineKeyboardMarkup
 from bot.helper.ext_utils.telegraph_helper import telegraph
 from tenacity import *
 from bot import DRIVE_NAME, DRIVE_ID, UNI_INDEX_URL
+from oauth_server import get_user_service
 
 from bot import (
     BUTTON_FIVE_NAME,
@@ -48,12 +46,9 @@ if USE_SERVICE_ACCOUNTS:
 SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
 
 class GoogleDriveHelper:
-    def __init__(self, name=None, listener=None):
-        self.__G_DRIVE_TOKEN_FILE = "token.pickle"
+    def __init__(self, name=None, listener=None, user_id=None):
         # Check https://developers.google.com/drive/scopes for all available scopes
         self.__OAUTH_SCOPE = ['https://www.googleapis.com/auth/drive']
-        # Redirect URI for installed apps, can be left as is
-        self.__REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
         self.__G_DRIVE_DIR_MIME_TYPE = "application/vnd.google-apps.folder"
         self.__G_DRIVE_BASE_DOWNLOAD_URL = "https://drive.google.com/uc?id={}&export=download"
         self.__G_DRIVE_DIR_BASE_DOWNLOAD_URL = "https://drive.google.com/drive/folders/{}"
@@ -82,6 +77,7 @@ class GoogleDriveHelper:
         self.total_folders = 0
         self.transferred_size = 0
         self.sa_count = 0
+        self.user_id = user_id
 
     def speed(self):
         """
@@ -637,34 +633,21 @@ class GoogleDriveHelper:
                 break
         return new_id
     
-    def authorize(self):
-        # Get credentials
-        credentials = None
-        if not USE_SERVICE_ACCOUNTS:
-            if os.path.exists(self.__G_DRIVE_TOKEN_FILE):
-                with open(self.__G_DRIVE_TOKEN_FILE, "rb") as f:
-                    credentials = pickle.load(f)
-            if credentials is None or not credentials.valid:
-                if credentials and credentials.expired and credentials.refresh_token:
-                    credentials.refresh(Request())
-                else:
-                    flow = InstalledAppFlow.from_client_secrets_file(
-                        "credentials.json", self.__OAUTH_SCOPE
-                    )
-                    LOGGER.info(flow)
-                    credentials = flow.run_console(port=0)
-
-                # Save the credentials for the next run
-                with open(self.__G_DRIVE_TOKEN_FILE, "wb") as token:
-                    pickle.dump(credentials, token)
-        else:
-            LOGGER.info(
-                f"Authorizing with {SERVICE_ACCOUNT_INDEX}.json service account"
-            )
-            credentials = service_account.Credentials.from_service_account_file(
-                f"accounts/{SERVICE_ACCOUNT_INDEX}.json", scopes=self.__OAUTH_SCOPE
-            )
-        return build("drive", "v3", credentials=credentials, cache_discovery=False)
+def authorize(self): #NP
+    if USE_SERVICE_ACCOUNTS: #VP
+        LOGGER.info( #QW
+            f"Authorizing with {SERVICE_ACCOUNT_INDEX}.json service account" #BT
+        ) #VN
+        credentials = service_account.Credentials.from_service_account_file( #JV
+            f"accounts/{SERVICE_ACCOUNT_INDEX}.json", scopes=self.__OAUTH_SCOPE #JB
+        ) #VN
+        return build("drive", "v3", credentials=credentials, cache_discovery=False) #SW
+    # Per-user OAuth
+    try: #JB
+        return get_user_service(self.user_id) #QH
+    except RuntimeError as e: #KM
+        LOGGER.error(f"Per-user auth failed for {self.user_id}: {e}") #HN
+        raise #QM
 
     def edit_telegraph(self):
         nxt_page = 1

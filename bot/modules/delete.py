@@ -19,7 +19,7 @@ def deletefile(update, context):
         msg = "send a link along with command"
 
     if msg == "":
-        drive = gdriveTools.GoogleDriveHelper()
+        drive = gdriveTools.GoogleDriveHelper(user_id=update.message.from_user.id)
         msg = drive.deletefile(link)
     LOGGER.info(f"this is msg : {msg}")
     reply_message = sendMessage(msg, context.bot, update)

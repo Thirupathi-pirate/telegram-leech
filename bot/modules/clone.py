@@ -58,7 +58,7 @@ def cloneNode(update, context):
             return sendMessage(str(e), context.bot, update)
     if is_gdrive_link(link):
         msg = sendMessage(f"Checking Drive Link...", context.bot, update)
-        gd = gdriveTools.GoogleDriveHelper()
+        gd = gdriveTools.GoogleDriveHelper(user_id=update.message.from_user.id)
         res, size, name, files = gd.clonehelper(link)
         deleteMessage(context.bot, msg)
         if res != "":
@@ -82,7 +82,7 @@ def cloneNode(update, context):
             result, button = gd.clone(link)
             deleteMessage(context.bot, msg)
         else:
-            drive = gdriveTools.GoogleDriveHelper(name)
+            drive = gdriveTools.GoogleDriveHelper(name, user_id=update.message.from_user.id)
             gid = ''.join(random.SystemRandom().choices(string.ascii_letters + string.digits, k=12))
             clone_status = CloneStatus(drive, size, update, gid)
             with download_dict_lock:

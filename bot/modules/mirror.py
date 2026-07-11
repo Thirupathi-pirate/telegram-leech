@@ -69,13 +69,14 @@ ariaDlManager.start_listener()
 
 
 class MirrorListener(listeners.MirrorListeners):
-    def __init__(self, bot, update, isTar=False, isZip=False, extract=False, isLeech=False, pswd=None):
+    def __init__(self, bot, update, isTar=False, isZip=False, extract=False, isLeech=False, pswd=None, user_id=None):
         super().__init__(bot, update)
         self.isZip = isZip
         self.isTar = isTar
         self.extract = extract
         self.pswd = pswd
         self.isLeech = isLeech
+        self.user_id = user_id
 
     def onDownloadStarted(self):
         pass
@@ -177,7 +178,7 @@ class MirrorListener(listeners.MirrorListeners):
             tg.upload()
         else:
             LOGGER.info(f"Upload Name: {up_name}")
-            drive = gdriveTools.GoogleDriveHelper(up_name, self)
+            drive = gdriveTools.GoogleDriveHelper(up_name, self, user_id=self.user_id)
             upload_status = UploadStatus(drive, size, gid, self)
             with download_dict_lock:
                 download_dict[self.uid] = upload_status
@@ -445,7 +446,7 @@ def _mirror(bot, update,isTar=False, isZip=False, extract=False, isLeech=False, 
             or len(link) == 0
         ) and file is not None:
             if file.mime_type != "application/x-bittorrent":
-                listener = MirrorListener(bot, update, isTar, isZip, extract, isLeech=isLeech, pswd=pswd)
+                listener = MirrorListener(bot, update, isTar, isZip, extract, isLeech=isLeech, pswd=pswd, user_id=update.message.from_user.id)
                 tg_downloader = TelegramDownloadHelper(listener)
                 ms = update.message
                 tg_downloader.add_download(ms, f'{DOWNLOAD_DIR}{listener.uid}/', name)
@@ -500,14 +501,14 @@ def _mirror(bot, update,isTar=False, isZip=False, extract=False, isLeech=False, 
         if "Youtube" in str(e):
                 sendMessage(f"{e}", bot, update)
                 return    
-    listener = MirrorListener(bot, update, isTar, isZip, extract, isLeech, pswd)
+    listener = MirrorListener(bot, update, isTar, isZip, extract, isLeech, pswd, user_id=update.message.from_user.id)
     if bot_utils.is_gdrive_link(link):
         if not isZip and not isTar and not extract and not isLeech:
             sendMessage(
                 f"Use /{BotCommands.CloneCommand} To Copy File/Folder", bot, update
             )
             return
-        res, size, name, files = gdriveTools.GoogleDriveHelper().clonehelper(link)
+        res, size, name, files = gdriveTools.GoogleDriveHelper(user_id=update.message.from_user.id).clonehelper(link)
         if res != "":
             sendMessage(res, bot, update)
             return
@@ -517,7 +518,7 @@ def _mirror(bot, update,isTar=False, isZip=False, extract=False, isLeech=False, 
         except IndexError:
             name = name
         LOGGER.info(f"Download Name : {name}")
-        drive = gdriveTools.GoogleDriveHelper(name, listener)
+        drive = gdriveTools.GoogleDriveHelper(name, listener, update.message.from_user.id)
         gid = "".join(
             random.SystemRandom().choices(string.ascii_letters + string.digits, k=12)
         )

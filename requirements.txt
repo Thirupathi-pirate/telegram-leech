@@ -24,3 +24,4 @@ telegraph
 tenacity
 TgCrypto
 yt-dlp
+aiohttp

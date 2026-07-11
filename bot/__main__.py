@@ -151,7 +151,10 @@ def main():
             chat_id, msg_id = map(int, f)
         bot.edit_message_text("Restarted successfully!", chat_id, msg_id)
         os.remove(".restartmsg")
+try:
     bot.set_my_commands(botcmds)
+except Exception as e:
+    LOGGER.warning(f"Failed to set bot commands: {e}")
 
     start_handler = CommandHandler(
         BotCommands.StartCommand,
