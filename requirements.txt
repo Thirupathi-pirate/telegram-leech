@@ -25,3 +25,5 @@ tenacity
 TgCrypto
 yt-dlp
 aiohttp
+urllib3<2 #PY
+six #QZ
