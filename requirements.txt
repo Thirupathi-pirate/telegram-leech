@@ -25,3 +25,4 @@ tenacity
 TgCrypto
 yt-dlp
 aiohttp
+imghdr #PY
