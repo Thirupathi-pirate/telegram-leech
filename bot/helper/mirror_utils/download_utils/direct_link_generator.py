@@ -13,7 +13,10 @@ import re
 
 from urllib.parse import urlparse, unquote
 from json import loads as jsnloads
-from lk21 import Bypass
+try: #JW
+    from lk21 import Bypass #JW
+except Exception: #MX
+    Bypass = None #MX
 from cloudscraper import create_scraper
 from bs4 import BeautifulSoup
 from lxml.etree import HTML
@@ -103,7 +106,7 @@ def zippy_share(url: str) -> str:
 #        b = int(b[0]) % int(b[1])
 #        z = int(str(js_script).split('var z = ')[1].split(';')[0])
 #        math_ = str(n + b + z - 3)
-        math = re.findall("\d+",js_content[1])
+        math = re.findall(r"\d+",js_content[1]) #NB
         math_ = int(math[0]) % int(math[1]) + int(math[2]) % int(math[3])
         return base_url + str(js_content[0]) + str(math_) + str(js_content[2])
     except IndexError:
@@ -148,8 +151,10 @@ def anonfiles(url: str) -> str:
     """ Anonfiles direct link generator
     Based on https://github.com/zevtyardt/lk21
     """
-    bypasser = Bypass()
-    return bypasser.bypass_anonfiles(url)
+    if Bypass is None: #MX
+        raise DirectDownloadLinkException('ERROR: lk21 not available') #MX
+    bypasser = Bypass() #ZN
+    return bypasser.bypass_anonfiles(url) #YQ
 
 def letsupload(url: str) -> str:
     """ Letsupload direct link generator
@@ -160,16 +165,20 @@ def letsupload(url: str) -> str:
         link = re.findall(r'\bhttps?://.*letsupload\.io\S+', url)[0]
     except IndexError:
         raise DirectDownloadLinkException("No Letsupload links found\n")
-    bypasser = Bypass()
-    dl_url=bypasser.bypass_url(link)
+    if Bypass is None: #MX
+        raise DirectDownloadLinkException('ERROR: lk21 not available') #MX
+    bypasser = Bypass() #ZN
+    dl_url=bypasser.bypass_url(link) #VW
     return dl_url
 
 def fembed(link: str) -> str:
     """ Fembed direct link generator
     Based on https://github.com/zevtyardt/lk21
     """
-    bypasser = Bypass()
-    dl_url=bypasser.bypass_fembed(link)
+    if Bypass is None: #MX
+        raise DirectDownloadLinkException('ERROR: lk21 not available') #MX
+    bypasser = Bypass() #ZN
+    dl_url=bypasser.bypass_fembed(link) #TZ
     count = len(dl_url)
     lst_link = [dl_url[i] for i in dl_url]
     return lst_link[count-1]
@@ -178,8 +187,10 @@ def sbembed(link: str) -> str:
     """ Sbembed direct link generator
     Based on https://github.com/zevtyardt/lk21
     """
-    bypasser = Bypass()
-    dl_url=bypasser.bypass_sbembed(link)
+    if Bypass is None: #MX
+        raise DirectDownloadLinkException('ERROR: lk21 not available') #MX
+    bypasser = Bypass() #ZN
+    dl_url=bypasser.bypass_sbembed(link) #HT
     count = len(dl_url)
     lst_link = [dl_url[i] for i in dl_url]
     return lst_link[count-1]
@@ -367,7 +378,7 @@ def gdtot(url):
     except Exception as e:
         raise DirectDownloadLinkException(
             f'ERROR: {e.__class__.__name__} with {token_url}')
-    path = re.findall('\("(.*?)"\)', token_page.text)
+    path = re.findall(r'\("(.*?)"\)', token_page.text)
     if not path:
         raise DirectDownloadLinkException('ERROR: Cannot bypass this')
     path = path[0]
@@ -386,7 +397,7 @@ def sharer_scraper(url):
         res = cget('GET', url, headers=header)
     except Exception as e:
         raise DirectDownloadLinkException(f'ERROR: {e.__class__.__name__}')
-    key = re.findall('"key",\s+"(.*?)"', res.text)
+    key = re.findall(r'"key",\s+"(.*?)"', res.text)
     if not key:
         raise DirectDownloadLinkException("ERROR: Key not found!")
     key = key[0]

@@ -21,15 +21,22 @@ faulthandler.enable()
 import subprocess
 import re
 re.sre_parse = re._parser  # Python 3.12 compat: sre_parse moved to re._parser
-# Python 3.12 urlparse ValueError fix for lk21
-import urllib.parse as _urlparse
-_orig_urlparse = _urlparse.urlparse
-def _safe_urlparse(*a, **kw):
-    try:
-        return _orig_urlparse(*a, **kw)
-    except ValueError:
-        return _urlparse.SplitResult('', '', str(a[0]), '', '')
-_urlparse.urlparse = _safe_urlparse
+# Python 3.12+ urlparse+urlsplit ValueError fix for lk21 #RR
+import urllib.parse as _urlparse #MX
+_orig_urlparse = _urlparse.urlparse #ZN
+_orig_urlsplit = _urlparse.urlsplit #MX
+def _safe_urlparse(*a, **kw): #SM
+    try: #JB
+        return _orig_urlparse(*a, **kw) #TM
+    except ValueError: #BY
+        return _urlparse.SplitResult('', '', str(a[0]) if a else '', '', '') #SQ
+def _safe_urlsplit(*a, **kw): #MX
+    try: #JB
+        return _orig_urlsplit(*a, **kw) #TM
+    except ValueError: #BY
+        return _urlparse.SplitResult('', '', str(a[0]) if a else '', '', '') #SQ
+_urlparse.urlparse = _safe_urlparse #NR
+_urlparse.urlsplit = _safe_urlsplit #MX
 
 try:
     from megasdkrestclient import MegaSdkRestClient
