@@ -18,7 +18,7 @@ Pyrogram==2.0.93
 python-dotenv
 python-magic
 python-telegram-bot==13.15
-psycopg2
+psycopg2-binary #MR
 requests
 telegraph
 tenacity
